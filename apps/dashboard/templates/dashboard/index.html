@@ -1,0 +1,1345 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}RazorGuard - Dashboard{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom:24px;">
+    <h2 style="margin-bottom:4px;">Risk Operations</h2>
+    <p style="color:#8b8fa3;margin-top:0;">
+        Transaction monitoring and explainable fraud investigation
+    </p>
+</div>
+
+
+<!-- =========================================================
+     TOP STATISTICS
+========================================================= -->
+
+<div class="stats">
+
+    <div class="stat-card">
+        <div class="n">{{ total }}</div>
+        <div class="label">Total Transactions</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="n" style="color:#e5484d">
+            {{ high_count }}
+        </div>
+        <div class="label">High Risk</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="n" style="color:#f5a623">
+            {{ medium_count }}
+        </div>
+        <div class="label">Medium Risk</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="n" style="color:#3dd68c">
+            {{ low_count }}
+        </div>
+        <div class="label">Low Risk</div>
+    </div>
+
+    <div class="stat-card trusted-stat">
+        <div class="n" style="color:#58d68d">
+            {{ no_risk_count }}
+        </div>
+        <div class="label">No Risk Detected</div>
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     RISK FILTERS
+========================================================= -->
+
+<div class="filters">
+
+    <a href="?"
+       class="{% if not risk_filter %}active{% endif %}">
+        All
+    </a>
+
+    <a href="?risk_category=high"
+       class="{% if risk_filter == 'high' %}active{% endif %}">
+        High
+    </a>
+
+    <a href="?risk_category=medium"
+       class="{% if risk_filter == 'medium' %}active{% endif %}">
+        Medium
+    </a>
+
+    <a href="?risk_category=low"
+       class="{% if risk_filter == 'low' %}active{% endif %}">
+        Low
+    </a>
+
+    <a href="?risk_category=no_risk"
+       class="{% if risk_filter == 'no_risk' %}active{% endif %}">
+        No Risk Detected
+    </a>
+
+</div>
+
+
+<!-- =========================================================
+     TRUSTED ACTIVITY
+========================================================= -->
+
+{% if risk_filter == "no_risk" %}
+
+<div class="panel trusted-panel">
+
+    <!-- Header -->
+
+    <div class="trusted-header">
+
+        <div>
+
+            <div class="trusted-title-row">
+
+                <span class="trusted-green-dot"></span>
+
+                <h2 class="trusted-title">
+                    Trusted Activity
+                </h2>
+
+            </div>
+
+            <p class="trusted-description">
+                Customers with transactions where RazorGuard detected
+                no risk signal.
+            </p>
+
+        </div>
+
+        <div class="trusted-header-icon">
+            ✓
+        </div>
+
+    </div>
+
+
+    {% if trusted_groups %}
+
+    <!-- =====================================================
+         CUSTOMER TRUST CARDS
+    ====================================================== -->
+
+    <div class="trusted-grid">
+
+        {% for group in trusted_groups %}
+
+        <div class="trusted-card">
+
+
+            <!-- CUSTOMER HEADER -->
+
+            <div class="trusted-card-top">
+
+                <div>
+
+                    <div class="trusted-customer">
+                        {{ group.customer__customer_id }}
+                    </div>
+
+                    <div class="trusted-status">
+                        <span class="status-dot"></span>
+                        NO RISK DETECTED
+                    </div>
+
+                </div>
+
+                <div class="trusted-icon">
+                    ✓
+                </div>
+
+            </div>
+
+
+            <!-- CUSTOMER METRICS -->
+
+            <div class="trusted-metrics">
+
+                <div class="trusted-metric">
+
+                    <span>
+                        Transactions
+                    </span>
+
+                    <strong>
+                        {{ group.transaction_count }}
+                    </strong>
+
+                </div>
+
+
+                <div class="trusted-metric">
+
+                    <span>
+                        Total value
+                    </span>
+
+                    <strong>
+                        ₹{{ group.total_amount|floatformat:2 }}
+                    </strong>
+
+                </div>
+
+
+                <div class="trusted-metric">
+
+                    <span>
+                        Average
+                    </span>
+
+                    <strong>
+                        ₹{{ group.average_amount|floatformat:2 }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTIVITY PERIOD -->
+
+            <div class="trusted-timeline">
+
+                <div>
+
+                    <span>
+                        First activity
+                    </span>
+
+                    <strong>
+                        {{ group.first_activity|date:"Y-m-d H:i" }}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Latest activity
+                    </span>
+
+                    <strong>
+                        {{ group.last_activity|date:"Y-m-d H:i" }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 EXPANDABLE TRANSACTION HISTORY
+            ================================================== -->
+
+            <details class="trusted-details">
+
+                <summary>
+
+                    <span>
+                        View trusted activity
+                    </span>
+
+                    <span class="summary-arrow">
+                        ↓
+                    </span>
+
+                </summary>
+
+
+                <div class="activity-list">
+
+                    {% for activity in group.transactions %}
+
+                    <a
+                        class="activity-row"
+                        href="{% url 'dashboard-transaction-detail' activity.transaction_id %}"
+                    >
+
+
+                        <!-- TRANSACTION -->
+
+                        <div class="activity-main">
+
+                            <div class="activity-id">
+
+                                {{ activity.transaction_id }}
+
+                            </div>
+
+                            <div class="activity-meta">
+
+                                {{ activity.timestamp|date:"Y-m-d H:i" }}
+
+                                {% if activity.payment_method %}
+                                    · {{ activity.payment_method }}
+                                {% endif %}
+
+                                {% if activity.location %}
+                                    · {{ activity.location }}
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- DEVICE -->
+
+                        <div class="activity-device">
+
+                            <span>
+                                Device
+                            </span>
+
+                            <strong>
+
+                                {% if activity.device %}
+                                    {{ activity.device.device_id }}
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            </strong>
+
+                        </div>
+
+
+                        <!-- AMOUNT -->
+
+                        <div class="activity-amount">
+
+                            ₹{{ activity.amount|floatformat:2 }}
+
+                        </div>
+
+
+                        <!-- SAFE -->
+
+                        <div class="activity-safe">
+
+                            ✓
+
+                        </div>
+
+
+                    </a>
+
+                    {% empty %}
+
+                    <div class="activity-empty">
+
+                        No trusted transactions found.
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                {% if group.transaction_count > 25 %}
+
+                <div class="activity-limit">
+
+                    Showing the latest 25 trusted transactions.
+
+                </div>
+
+                {% endif %}
+
+
+            </details>
+
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    {% else %}
+
+    <div class="trusted-empty">
+
+        <div class="trusted-empty-icon">
+            ✓
+        </div>
+
+        <div>
+
+            <strong>
+                No zero-risk transactions found
+            </strong>
+
+            <p>
+                RazorGuard has not identified any transactions
+                with a zero risk score in this view.
+            </p>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+
+<!-- =========================================================
+     TRANSACTION TABLE
+========================================================= -->
+
+<div class="panel">
+
+    <div class="transaction-header">
+
+        <div>
+
+            <h2>
+
+                {% if risk_filter == "no_risk" %}
+
+                    Zero-Risk Transactions
+
+                {% elif risk_filter %}
+
+                    {{ risk_filter|title }} Risk Transactions
+
+                {% else %}
+
+                    Recent Transactions
+
+                {% endif %}
+
+            </h2>
+
+            <p>
+
+                {% if risk_filter == "no_risk" %}
+
+                    Individual transactions behind the trusted
+                    activity groups.
+
+                {% else %}
+
+                    Latest transaction activity monitored by RazorGuard.
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Transaction
+                </th>
+
+                <th>
+                    Customer
+                </th>
+
+                <th>
+                    Amount
+                </th>
+
+                <th>
+                    Timestamp
+                </th>
+
+                <th>
+                    Risk Score
+                </th>
+
+                <th>
+                    Category
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            {% for txn in transactions %}
+
+            <tr>
+
+
+                <!-- TRANSACTION -->
+
+                <td>
+
+                    <a href="{% url 'dashboard-transaction-detail' txn.transaction_id %}">
+
+                        {{ txn.transaction_id }}
+
+                    </a>
+
+                </td>
+
+
+                <!-- CUSTOMER -->
+
+                <td>
+
+                    {{ txn.customer.customer_id }}
+
+                </td>
+
+
+                <!-- AMOUNT -->
+
+                <td>
+
+                    ₹{{ txn.amount }}
+
+                </td>
+
+
+                <!-- TIMESTAMP -->
+
+                <td>
+
+                    {{ txn.timestamp|date:"Y-m-d H:i" }}
+
+                </td>
+
+
+                <!-- RISK SCORE -->
+
+                <td>
+
+                    {% if txn.risk_assessment %}
+
+                        <strong>
+
+                            {{ txn.risk_assessment.final_score|floatformat:1 }}
+
+                        </strong>
+
+                    {% else %}
+
+                        —
+
+                    {% endif %}
+
+                </td>
+
+
+                <!-- CATEGORY -->
+
+                <td>
+
+                    {% if txn.risk_assessment %}
+
+
+                        {% if txn.risk_assessment.final_score == 0 %}
+
+                            <span class="badge no-risk">
+                                no risk
+                            </span>
+
+
+                        {% else %}
+
+                            <span class="badge {{ txn.risk_assessment.risk_category }}">
+
+                                {{ txn.risk_assessment.risk_category }}
+
+                            </span>
+
+                        {% endif %}
+
+
+                    {% else %}
+
+                        <span class="badge medium">
+                            unscored
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+
+            </tr>
+
+
+            {% empty %}
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    style="padding:30px;text-align:center;color:#8b8fa3;"
+                >
+
+                    No transactions found for this view.
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- =========================================================
+     TRUSTED ACTIVITY STYLES
+========================================================= -->
+
+<style>
+
+    /* =====================================================
+       TRUSTED HEADER
+    ===================================================== */
+
+    .trusted-header {
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+
+    }
+
+
+    .trusted-title-row {
+
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+    }
+
+
+    .trusted-title {
+
+        color: #58d68d;
+        margin: 0;
+
+    }
+
+
+    .trusted-description {
+
+        color: #8b8fa3;
+        margin-top: 6px;
+
+    }
+
+
+    .trusted-green-dot {
+
+        width: 9px;
+        height: 9px;
+
+        border-radius: 50%;
+
+        background: #58d68d;
+
+        box-shadow:
+            0 0 0 4px rgba(88,214,141,0.10),
+            0 0 12px rgba(88,214,141,0.35);
+
+    }
+
+
+    .trusted-header-icon {
+
+        width: 42px;
+        height: 42px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 50%;
+
+        color: #58d68d;
+
+        background: rgba(88,214,141,0.08);
+
+        border: 1px solid rgba(88,214,141,0.18);
+
+        font-size: 18px;
+        font-weight: 700;
+
+    }
+
+
+    /* =====================================================
+       TRUSTED GRID
+    ===================================================== */
+
+    .trusted-grid {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(auto-fit, minmax(320px, 1fr));
+
+        gap: 16px;
+
+        margin-top: 24px;
+
+    }
+
+
+    /* =====================================================
+       TRUSTED CARD
+    ===================================================== */
+
+    .trusted-card {
+
+        border: 1px solid rgba(88,214,141,0.14);
+
+        border-radius: 12px;
+
+        padding: 18px;
+
+        background:
+            linear-gradient(
+                145deg,
+                rgba(88,214,141,0.035),
+                rgba(15,17,23,0.75)
+            );
+
+        transition:
+            border-color 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+
+    }
+
+
+    .trusted-card:hover {
+
+        border-color: rgba(88,214,141,0.28);
+
+        transform: translateY(-1px);
+
+        box-shadow:
+            0 8px 30px rgba(0,0,0,0.18);
+
+    }
+
+
+    /* =====================================================
+       CUSTOMER HEADER
+    ===================================================== */
+
+    .trusted-card-top {
+
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: flex-start;
+
+    }
+
+
+    .trusted-customer {
+
+        font-family: monospace;
+
+        font-size: 13px;
+
+        font-weight: 700;
+
+        color: #f1f3f7;
+
+        letter-spacing: 0.2px;
+
+    }
+
+
+    .trusted-status {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 6px;
+
+        margin-top: 6px;
+
+        color: #58d68d;
+
+        font-size: 9px;
+
+        font-weight: 700;
+
+        letter-spacing: 0.7px;
+
+    }
+
+
+    .status-dot {
+
+        width: 6px;
+        height: 6px;
+
+        border-radius: 50%;
+
+        background: #58d68d;
+
+    }
+
+
+    .trusted-icon {
+
+        width: 26px;
+        height: 26px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 50%;
+
+        background: rgba(88,214,141,0.10);
+
+        color: #58d68d;
+
+        font-weight: 700;
+
+        font-size: 12px;
+
+    }
+
+
+    /* =====================================================
+       METRICS
+    ===================================================== */
+
+    .trusted-metrics {
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(3, 1fr);
+
+        gap: 8px;
+
+        margin-top: 18px;
+
+    }
+
+
+    .trusted-metric {
+
+        padding: 10px;
+
+        border-radius: 8px;
+
+        background: rgba(255,255,255,0.025);
+
+        border: 1px solid rgba(255,255,255,0.045);
+
+    }
+
+
+    .trusted-metric span {
+
+        display: block;
+
+        color: #777d91;
+
+        font-size: 9px;
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.5px;
+
+    }
+
+
+    .trusted-metric strong {
+
+        display: block;
+
+        margin-top: 5px;
+
+        color: #e9edf5;
+
+        font-size: 12px;
+
+    }
+
+
+    /* =====================================================
+       TIMELINE
+    ===================================================== */
+
+    .trusted-timeline {
+
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 12px;
+
+        margin-top: 12px;
+
+        padding-top: 12px;
+
+        border-top: 1px solid rgba(255,255,255,0.05);
+
+    }
+
+
+    .trusted-timeline span {
+
+        display: block;
+
+        color: #777d91;
+
+        font-size: 9px;
+
+        text-transform: uppercase;
+
+    }
+
+
+    .trusted-timeline strong {
+
+        display: block;
+
+        margin-top: 4px;
+
+        color: #aeb4c3;
+
+        font-size: 10px;
+
+        font-family: monospace;
+
+    }
+
+
+    /* =====================================================
+       EXPANDABLE ACTIVITY
+    ===================================================== */
+
+    .trusted-details {
+
+        margin-top: 15px;
+
+        padding-top: 13px;
+
+        border-top: 1px solid rgba(255,255,255,0.05);
+
+    }
+
+
+    .trusted-details summary {
+
+        list-style: none;
+
+        cursor: pointer;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        color: #6ea8ff;
+
+        font-size: 11px;
+
+        font-weight: 600;
+
+        user-select: none;
+
+    }
+
+
+    .trusted-details summary::-webkit-details-marker {
+
+        display: none;
+
+    }
+
+
+    .trusted-details summary:hover {
+
+        color: #8bbcff;
+
+    }
+
+
+    .summary-arrow {
+
+        font-size: 13px;
+
+        transition:
+            transform 0.2s ease;
+
+    }
+
+
+    .trusted-details[open] .summary-arrow {
+
+        transform: rotate(180deg);
+
+    }
+
+
+    /* =====================================================
+       ACTIVITY LIST
+    ===================================================== */
+
+    .activity-list {
+
+        margin-top: 11px;
+
+        border:
+
+            1px solid
+            rgba(255,255,255,0.06);
+
+        border-radius: 8px;
+
+        overflow: hidden;
+
+    }
+
+
+    .activity-row {
+
+        display: grid;
+
+        grid-template-columns:
+            minmax(140px, 1.5fr)
+            minmax(90px, 1fr)
+            80px
+            24px;
+
+        gap: 10px;
+
+        align-items: center;
+
+        padding: 10px;
+
+        background: rgba(15,17,23,0.65);
+
+        border-bottom:
+            1px solid
+            rgba(255,255,255,0.045);
+
+        color: #e9edf5;
+
+        text-decoration: none;
+
+    }
+
+
+    .activity-row:last-child {
+
+        border-bottom: none;
+
+    }
+
+
+    .activity-row:hover {
+
+        background:
+            rgba(88,214,141,0.045);
+
+        text-decoration: none;
+
+    }
+
+
+    .activity-id {
+
+        font-family: monospace;
+
+        font-size: 9px;
+
+        font-weight: 600;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+
+        white-space: nowrap;
+
+    }
+
+
+    .activity-meta {
+
+        margin-top: 4px;
+
+        color: #777d91;
+
+        font-size: 8px;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+
+    }
+
+
+    .activity-device span {
+
+        display: block;
+
+        color: #777d91;
+
+        font-size: 8px;
+
+        text-transform: uppercase;
+
+    }
+
+
+    .activity-device strong {
+
+        display: block;
+
+        margin-top: 3px;
+
+        font-family: monospace;
+
+        font-size: 8px;
+
+        color: #aeb4c3;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+
+    }
+
+
+    .activity-amount {
+
+        text-align: right;
+
+        font-size: 10px;
+
+        font-weight: 600;
+
+        white-space: nowrap;
+
+    }
+
+
+    .activity-safe {
+
+        width: 18px;
+        height: 18px;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 50%;
+
+        background:
+            rgba(88,214,141,0.10);
+
+        color: #58d68d;
+
+        font-size: 9px;
+
+        font-weight: 700;
+
+    }
+
+
+    .activity-limit {
+
+        margin-top: 8px;
+
+        color: #777d91;
+
+        font-size: 9px;
+
+        text-align: center;
+
+    }
+
+
+    /* =====================================================
+       EMPTY TRUSTED STATE
+    ===================================================== */
+
+    .trusted-empty {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 14px;
+
+        margin-top: 22px;
+
+        padding: 20px;
+
+        border:
+            1px dashed
+            rgba(88,214,141,0.20);
+
+        border-radius: 10px;
+
+    }
+
+
+    .trusted-empty-icon {
+
+        width: 32px;
+        height: 32px;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 50%;
+
+        background:
+            rgba(88,214,141,0.08);
+
+        color: #58d68d;
+
+        font-weight: 700;
+
+    }
+
+
+    .trusted-empty strong {
+
+        color: #cbd1dd;
+
+        font-size: 12px;
+
+    }
+
+
+    .trusted-empty p {
+
+        margin: 4px 0 0;
+
+        color: #777d91;
+
+        font-size: 10px;
+
+    }
+
+
+    /* =====================================================
+       TRANSACTION HEADER
+    ===================================================== */
+
+    .transaction-header h2 {
+
+        margin-bottom: 4px;
+
+    }
+
+
+    .transaction-header p {
+
+        color: #8b8fa3;
+
+        margin-top: -6px;
+
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
+
+    @media (max-width: 700px) {
+
+        .trusted-grid {
+
+            grid-template-columns: 1fr;
+
+        }
+
+
+        .trusted-metrics {
+
+            grid-template-columns: 1fr;
+
+        }
+
+
+        .trusted-timeline {
+
+            grid-template-columns: 1fr;
+
+        }
+
+
+        .activity-row {
+
+            grid-template-columns:
+                1fr auto;
+
+        }
+
+
+        .activity-device {
+
+            display: none;
+
+        }
+
+
+        .activity-amount {
+
+            text-align: right;
+
+        }
+
+    }
+
+</style>
+
+{% endblock %}

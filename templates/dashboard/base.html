@@ -1,0 +1,128 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}RazorGuard{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'dashboard/style.css' %}">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-mark">R</div>
+
+            <div>
+                <div class="brand-name">RazorGuard</div>
+                <div class="brand-subtitle">Risk Intelligence</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <div class="nav-section">
+                MONITORING
+            </div>
+
+            <a href="{% url 'dashboard-home' %}" class="nav-item">
+                <span class="nav-icon">◉</span>
+                <span>Risk Operations</span>
+            </a>
+
+            <a href="{% url 'dashboard-home' %}?risk_category=no_risk"
+               class="nav-item">
+                <span class="nav-icon trusted-icon-nav">✓</span>
+                <span>Trusted Activity</span>
+            </a>
+
+            <div class="nav-section">
+                INVESTIGATION
+            </div>
+
+            <a href="{% url 'dashboard-home' %}?risk_category=high"
+               class="nav-item">
+                <span class="nav-icon danger-nav">!</span>
+                <span>High Risk</span>
+            </a>
+
+            <a href="{% url 'dashboard-home' %}?risk_category=medium"
+               class="nav-item">
+                <span class="nav-icon warning-nav">!</span>
+                <span>Medium Risk</span>
+            </a>
+
+            <a href="{% url 'dashboard-home' %}?risk_category=low"
+               class="nav-item">
+                <span class="nav-icon">•</span>
+                <span>Low Risk</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+
+            <div class="system-status">
+                <span class="status-dot"></span>
+
+                <div>
+                    <div class="status-title">System operational</div>
+                    <div class="status-subtitle">
+                        Monitoring transactions
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN AREA -->
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="topbar-title">
+                    Transaction Risk Intelligence
+                </div>
+
+                <div class="topbar-subtitle">
+                    Real-time monitoring and explainable fraud detection
+                </div>
+            </div>
+
+            <div class="topbar-right">
+
+                <div class="live-indicator">
+                    <span class="status-dot"></span>
+                    LIVE
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="page-content">
+
+            {% block content %}
+            {% endblock %}
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,484 @@
+/* =========================================================
+   RAZORGUARD - TRUSTED ACTIVITY / NO-RISK UI
+   ========================================================= */
+
+/* Trusted activity main panel */
+
+.trusted-panel {
+    margin-bottom: 24px;
+    border: 1px solid rgba(88, 214, 141, 0.18);
+    background: linear-gradient(
+        180deg,
+        rgba(88, 214, 141, 0.035),
+        rgba(88, 214, 141, 0.015)
+    );
+}
+
+
+/* Trusted customer cards */
+
+.trusted-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(320px, 1fr)
+    );
+    gap: 16px;
+    margin-top: 24px;
+}
+
+
+.trusted-card {
+    position: relative;
+    padding: 20px;
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.025);
+
+    border: 1px solid rgba(
+        88,
+        214,
+        141,
+        0.16
+    );
+
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease;
+}
+
+
+.trusted-card:hover {
+    transform: translateY(-2px);
+
+    border-color: rgba(
+        88,
+        214,
+        141,
+        0.38
+    );
+
+    background: rgba(
+        88,
+        214,
+        141,
+        0.045
+    );
+}
+
+
+/* Customer header */
+
+.trusted-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+
+.trusted-customer {
+    font-size: 17px;
+    font-weight: 700;
+    color: #f1f3f5;
+    letter-spacing: 0.2px;
+}
+
+
+.trusted-status {
+    margin-top: 5px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.9px;
+
+    color: #58d68d;
+}
+
+
+.trusted-icon {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: #58d68d;
+
+    background: rgba(
+        88,
+        214,
+        141,
+        0.10
+    );
+
+    border: 1px solid rgba(
+        88,
+        214,
+        141,
+        0.20
+    );
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+
+/* Trusted metrics */
+
+.trusted-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 10px;
+
+    margin-top: 22px;
+    padding-top: 18px;
+
+    border-top: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.06
+    );
+}
+
+
+.trusted-metrics > div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+
+.trusted-metrics span,
+.trusted-timeline span {
+    font-size: 11px;
+    color: #8b8fa3;
+}
+
+
+.trusted-metrics strong {
+    font-size: 14px;
+    color: #f1f3f5;
+}
+
+
+/* Activity timeline */
+
+.trusted-timeline {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 12px;
+
+    margin-top: 18px;
+    padding-top: 16px;
+
+    border-top: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.05
+    );
+}
+
+
+.trusted-timeline > div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+
+.trusted-timeline strong {
+    font-size: 12px;
+    color: #c9ccd6;
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   ZERO-RISK BADGE
+   ========================================================= */
+
+.badge.no-risk {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    color: #58d68d;
+
+    background: rgba(
+        88,
+        214,
+        141,
+        0.10
+    );
+
+    border: 1px solid rgba(
+        88,
+        214,
+        141,
+        0.18
+    );
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: lowercase;
+}
+
+
+.badge.no-risk::before {
+    content: "";
+
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #58d68d;
+}
+
+
+/* =========================================================
+   TRUSTED TRANSACTION ACTIVITY
+   ========================================================= */
+
+.activity-list {
+    margin-top: 18px;
+
+    border-top: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.06
+    );
+}
+
+
+.activity-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(150px, 1.4fr)
+        minmax(100px, 0.8fr)
+        minmax(150px, 1fr)
+        minmax(100px, 0.7fr);
+
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.05
+    );
+
+    transition:
+        background 0.15s ease,
+        padding 0.15s ease;
+}
+
+
+.activity-row:hover {
+    padding-left: 8px;
+    padding-right: 8px;
+
+    background: rgba(
+        88,
+        214,
+        141,
+        0.025
+    );
+}
+
+
+/* Transaction ID */
+
+.activity-id {
+    font-size: 12px;
+
+    color: #c9ccd6;
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        monospace;
+}
+
+
+/* Activity metadata */
+
+.activity-meta {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.activity-meta span {
+    font-size: 10px;
+
+    color: #707487;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.6px;
+}
+
+
+.activity-meta strong {
+    font-size: 12px;
+
+    color: #d7dae2;
+
+    font-weight: 500;
+}
+
+
+/* Device / secondary information */
+
+.activity-device {
+    font-size: 11px;
+
+    color: #8b8fa3;
+}
+
+
+/* Transaction amount */
+
+.activity-amount {
+    text-align: right;
+
+    font-size: 13px;
+
+    color: #f1f3f5;
+
+    font-weight: 600;
+}
+
+
+/* Safe indicator */
+
+.activity-safe {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    padding: 4px 8px;
+
+    border-radius: 999px;
+
+    color: #58d68d;
+
+    background: rgba(
+        88,
+        214,
+        141,
+        0.08
+    );
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* =========================================================
+   TRUSTED STAT CARD
+   ========================================================= */
+
+.trusted-stat {
+    position: relative;
+
+    border-color: rgba(
+        88,
+        214,
+        141,
+        0.18
+    );
+}
+
+
+.trusted-stat::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 2px;
+
+    border-radius: 0 0 8px 8px;
+
+    background: #58d68d;
+
+    opacity: 0.65;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .trusted-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .activity-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .activity-amount {
+        text-align: left;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .trusted-metrics {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .trusted-timeline {
+        grid-template-columns: 1fr;
+    }
+
+    .activity-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .activity-amount {
+        text-align: left;
+    }
+}

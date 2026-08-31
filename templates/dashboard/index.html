@@ -1,0 +1,561 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}RazorGuard - Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+    <div>
+        <div class="eyebrow">RISK OPERATIONS CENTER</div>
+
+        <h1>Transaction Monitoring</h1>
+
+        <p>
+            Monitor transaction activity, identify emerging risk,
+            and investigate trusted customer behavior.
+        </p>
+    </div>
+
+    <div class="system-status">
+        <span class="status-dot"></span>
+        SYSTEM MONITORING
+    </div>
+</div>
+
+
+<!-- =====================================================
+     SUMMARY
+     ===================================================== -->
+
+<div class="stats">
+
+    <div class="stat-card">
+        <div class="stat-icon">Σ</div>
+        <div class="n">{{ total }}</div>
+        <div class="label">Total Transactions</div>
+    </div>
+
+
+    <div class="stat-card risk-high-card">
+        <div class="stat-icon">!</div>
+        <div class="n">
+            {{ high_count }}
+        </div>
+        <div class="label">High Risk</div>
+    </div>
+
+
+    <div class="stat-card risk-medium-card">
+        <div class="stat-icon">~</div>
+        <div class="n">
+            {{ medium_count }}
+        </div>
+        <div class="label">Medium Risk</div>
+    </div>
+
+
+    <div class="stat-card risk-low-card">
+        <div class="stat-icon">↓</div>
+        <div class="n">
+            {{ low_count }}
+        </div>
+        <div class="label">Low Risk</div>
+    </div>
+
+
+    <div class="stat-card trusted-stat">
+        <div class="stat-icon">✓</div>
+        <div class="n">
+            {{ no_risk_count }}
+        </div>
+        <div class="label">
+            Trusted Transactions
+        </div>
+
+        <div class="stat-description">
+            Risk score &lt; {{ trusted_threshold }}
+        </div>
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     FILTERS
+     ===================================================== -->
+
+<div class="filters">
+
+    <a href="?"
+       class="{% if not risk_filter %}active{% endif %}">
+        All Activity
+    </a>
+
+    <a href="?risk_category=high"
+       class="{% if risk_filter == 'high' %}active-high{% endif %}">
+        High Risk
+    </a>
+
+    <a href="?risk_category=medium"
+       class="{% if risk_filter == 'medium' %}active-medium{% endif %}">
+        Medium Risk
+    </a>
+
+    <a href="?risk_category=low"
+       class="{% if risk_filter == 'low' %}active-low{% endif %}">
+        Low Risk
+    </a>
+
+    <a href="?risk_category=no_risk"
+       class="{% if risk_filter == 'no_risk' %}active-trusted{% endif %}">
+        ✓ Trusted Activity
+    </a>
+
+</div>
+
+
+<!-- =====================================================
+     TRUSTED ACTIVITY
+     ===================================================== -->
+
+{% if risk_filter == "no_risk" %}
+
+<div class="panel trusted-panel">
+
+    <div class="trusted-panel-header">
+
+        <div>
+
+            <div class="eyebrow trusted-eyebrow">
+                TRUSTED ACTIVITY
+            </div>
+
+            <h2>
+                Customers with no significant risk signals
+            </h2>
+
+            <p>
+                Transactions with a risk score below
+                <strong>{{ trusted_threshold }}</strong>
+                are grouped by customer so repeated legitimate
+                activity can be understood as a pattern.
+            </p>
+
+        </div>
+
+
+        <div class="trusted-header-badge">
+
+            <span class="trusted-live-dot"></span>
+
+            TRUSTED
+
+        </div>
+
+    </div>
+
+
+    {% if trusted_groups %}
+
+    <div class="trusted-summary">
+
+        <div>
+            <span>Trusted customers</span>
+            <strong>{{ trusted_groups|length }}</strong>
+        </div>
+
+        <div>
+            <span>Risk threshold</span>
+            <strong>&lt; {{ trusted_threshold }}</strong>
+        </div>
+
+        <div>
+            <span>Activity view</span>
+            <strong>Customer grouped</strong>
+        </div>
+
+    </div>
+
+
+    <div class="trusted-grid">
+
+        {% for group in trusted_groups %}
+
+        <div class="trusted-card">
+
+            <div class="trusted-card-top">
+
+                <div>
+
+                    <div class="trusted-customer">
+                        {{ group.customer__customer_id }}
+                    </div>
+
+                    <div class="trusted-status">
+                        VERIFIED LOW-RISK ACTIVITY
+                    </div>
+
+                </div>
+
+
+                <div class="trusted-icon">
+                    ✓
+                </div>
+
+            </div>
+
+
+            <div class="trusted-metrics">
+
+                <div>
+                    <span>Transactions</span>
+
+                    <strong>
+                        {{ group.transaction_count }}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Total value</span>
+
+                    <strong>
+                        ₹{{ group.total_amount|floatformat:2 }}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Average</span>
+
+                    <strong>
+                        ₹{{ group.average_amount|floatformat:2 }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="trusted-timeline">
+
+                <div>
+                    <span>First activity</span>
+
+                    <strong>
+                        {{ group.first_activity|date:"Y-m-d H:i" }}
+                    </strong>
+                </div>
+
+
+                <div>
+                    <span>Latest activity</span>
+
+                    <strong>
+                        {{ group.last_activity|date:"Y-m-d H:i" }}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 CUSTOMER TRANSACTION ACTIVITY
+                 ========================================= -->
+
+            <div class="trusted-activity">
+
+                <div class="trusted-activity-heading">
+
+                    <span>
+                        Recent trusted transactions
+                    </span>
+
+                    <span class="activity-count">
+                        {{ group.transactions|length }}
+                    </span>
+
+                </div>
+
+
+                {% for txn in group.transactions %}
+
+                <a
+                    href="{% url 'dashboard-transaction-detail' txn.transaction_id %}"
+                    class="trusted-transaction"
+                >
+
+                    <div class="trusted-transaction-main">
+
+                        <strong>
+                            {{ txn.transaction_id }}
+                        </strong>
+
+                        <span>
+                            {{ txn.timestamp|date:"Y-m-d H:i" }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="trusted-transaction-meta">
+
+                        <span>
+                            ₹{{ txn.amount|floatformat:2 }}
+                        </span>
+
+                        {% if txn.merchant %}
+                        <span>
+                            {{ txn.merchant }}
+                        </span>
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="trusted-transaction-score">
+
+                        {% if txn.risk_assessment %}
+
+                        <span>
+                            {{ txn.risk_assessment.final_score|floatformat:2 }}
+                        </span>
+
+                        {% else %}
+
+                        <span>—</span>
+
+                        {% endif %}
+
+                    </div>
+
+                </a>
+
+                {% empty %}
+
+                <div class="trusted-empty">
+                    No recent trusted transactions.
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="trusted-empty-large">
+
+        <div class="empty-icon">✓</div>
+
+        <h3>No trusted activity found</h3>
+
+        <p>
+            No transactions currently meet the trusted activity
+            threshold of &lt; {{ trusted_threshold }}.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+
+<!-- =====================================================
+     TRANSACTION TABLE
+     ===================================================== -->
+
+<div class="panel">
+
+    <div class="panel-header">
+
+        <div>
+
+            <div class="eyebrow">
+                TRANSACTION STREAM
+            </div>
+
+            <h2>
+
+                {% if risk_filter == "no_risk" %}
+
+                    Trusted Transactions
+
+                {% elif risk_filter %}
+
+                    {{ risk_filter|title }} Risk Transactions
+
+                {% else %}
+
+                    Recent Transactions
+
+                {% endif %}
+
+            </h2>
+
+            <p>
+
+                {% if risk_filter == "no_risk" %}
+
+                    Individual transactions contributing to trusted
+                    customer activity.
+
+                {% else %}
+
+                    Latest transaction activity monitored by RazorGuard.
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Transaction</th>
+
+                    <th>Customer</th>
+
+                    <th>Amount</th>
+
+                    <th>Timestamp</th>
+
+                    <th>Risk Score</th>
+
+                    <th>Category</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            {% for txn in transactions %}
+
+            <tr>
+
+                <td>
+
+                    <a
+                        href="{% url 'dashboard-transaction-detail' txn.transaction_id %}"
+                    >
+                        {{ txn.transaction_id }}
+                    </a>
+
+                </td>
+
+
+                <td>
+
+                    {{ txn.customer.customer_id }}
+
+                </td>
+
+
+                <td>
+
+                    ₹{{ txn.amount|floatformat:2 }}
+
+                </td>
+
+
+                <td>
+
+                    {{ txn.timestamp|date:"Y-m-d H:i" }}
+
+                </td>
+
+
+                <td>
+
+                    {% if txn.risk_assessment %}
+
+                    <strong>
+
+                        {{ txn.risk_assessment.final_score|floatformat:2 }}
+
+                    </strong>
+
+                    {% else %}
+
+                    —
+
+                    {% endif %}
+
+                </td>
+
+
+                <td>
+
+                    {% if txn.risk_assessment %}
+
+                        {% if txn.risk_assessment.final_score < trusted_threshold %}
+
+                            <span class="badge no-risk">
+                                TRUSTED
+                            </span>
+
+                        {% else %}
+
+                            <span
+                                class="badge {{ txn.risk_assessment.risk_category }}"
+                            >
+                                {{ txn.risk_assessment.risk_category }}
+                            </span>
+
+                        {% endif %}
+
+                    {% else %}
+
+                        <span class="badge medium">
+                            UNSCORED
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+
+            {% empty %}
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="table-empty"
+                >
+                    No transactions found for this view.
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

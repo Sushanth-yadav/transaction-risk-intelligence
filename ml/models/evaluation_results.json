@@ -1,0 +1,89 @@
+{
+  "logistic_regression": {
+    "model": "LogisticRegression",
+    "threshold": 0.5,
+    "precision": 0.6798,
+    "recall": 0.9837,
+    "f1": 0.804,
+    "roc_auc": 0.9984,
+    "pr_auc": 0.9526,
+    "confusion_matrix": {
+      "tn": 4698,
+      "fp": 57,
+      "fn": 2,
+      "tp": 121
+    },
+    "false_positive_rate": 0.012,
+    "false_negative_rate": 0.0163,
+    "test_size": 4878,
+    "test_fraud_count": 123
+  },
+  "random_forest": {
+    "model": "RandomForest",
+    "threshold": 0.5,
+    "precision": 0.9664,
+    "recall": 0.935,
+    "f1": 0.9504,
+    "roc_auc": 0.9998,
+    "pr_auc": 0.9942,
+    "confusion_matrix": {
+      "tn": 4751,
+      "fp": 4,
+      "fn": 8,
+      "tp": 115
+    },
+    "false_positive_rate": 0.0008,
+    "false_negative_rate": 0.065,
+    "test_size": 4878,
+    "test_fraud_count": 123
+  },
+  "random_forest_feature_importance_top10": [
+    {
+      "feature": "amount_ratio_to_customer_avg",
+      "importance": 0.2131
+    },
+    {
+      "feature": "amount",
+      "importance": 0.1835
+    },
+    {
+      "feature": "amount_zscore_vs_customer",
+      "importance": 0.1433
+    },
+    {
+      "feature": "hours_since_last_txn",
+      "importance": 0.1057
+    },
+    {
+      "feature": "txn_count_last_1h",
+      "importance": 0.0644
+    },
+    {
+      "feature": "is_new_ip",
+      "importance": 0.0545
+    },
+    {
+      "feature": "is_new_device",
+      "importance": 0.0443
+    },
+    {
+      "feature": "txn_count_last_24h",
+      "importance": 0.0372
+    },
+    {
+      "feature": "device_customer_count_so_far",
+      "importance": 0.0315
+    },
+    {
+      "feature": "account_age_days",
+      "importance": 0.0266
+    }
+  ],
+  "split_info": {
+    "split_timestamp": "2026-04-01 06:06:38",
+    "train_size": 14632,
+    "train_fraud_count": 396,
+    "test_size": 4878,
+    "test_fraud_count": 123
+  }
+}

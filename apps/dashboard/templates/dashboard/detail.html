@@ -1,0 +1,202 @@
+{% extends "dashboard/base.html" %}
+{% block title %}{{ txn.transaction_id }} - RazorGuard{% endblock %}
+{% block content %}
+
+<h2 style="margin-bottom:4px">{{ txn.transaction_id }}</h2>
+<p style="color:#8b8fa3;margin-top:0">
+    {{ txn.customer.customer_id }} · ₹{{ txn.amount }} · {{ txn.timestamp }} · {{ txn.location }} · {{ txn.payment_method }}
+</p>
+
+{% if assessment %}
+<div class="panel">
+    <h2>Risk Assessment</h2>
+    <p>
+        <span class="badge {{ assessment.risk_category }}">{{ assessment.risk_category }}</span>
+        &nbsp; Final score: <strong>{{ assessment.final_score|floatformat:1 }}</strong> / 100
+        &nbsp; Confidence: <strong>{{ assessment.confidence }}</strong>
+        &nbsp; Recommended action: <strong>{{ assessment.recommended_action }}</strong>
+    </p>
+    <div class="score-row">
+        <div>ML score<br><strong>{{ assessment.ml_score|floatformat:1 }}</strong></div>
+        <div>Rule score<br><strong>{{ assessment.rule_score|floatformat:1 }}</strong></div>
+        <div>Behavioral score<br><strong>{{ assessment.behavioral_score|floatformat:1 }}</strong></div>
+        <div>Graph score<br><strong>{{ assessment.graph_score|floatformat:1 }}</strong></div>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Evidence</h2>
+    {% for item in evidence_items %}
+    <div class="evidence-item">
+        <span class="evidence-type">{{ item.evidence_type }}</span>{{ item.description }}
+    </div>
+    {% empty %}
+    <p style="color:#8b8fa3">No evidence recorded.</p>
+    {% endfor %}
+</div>
+
+<div class="panel">
+    <h2>Connected Entities</h2>
+    {% if related.is_suspicious_cluster %}
+    <p>⚠ Connected to <strong>{{ related.connected_customers|length }}</strong> other customer(s) via shared device/IP:</p>
+    <ul>{% for c in related.connected_customers %}<li>{{ c }}</li>{% endfor %}</ul>
+    {% else %}
+    <p style="color:#8b8fa3">No suspicious entity connections found.</p>
+    {% endif %}
+</div>
+{% else %}
+<div class="panel"><p>No risk assessment available for this transaction.</p></div>
+{% endif %}
+
+<div class="panel">
+    <h2>Investigation Assistant</h2>
+    <div id="chat-log"></div>
+    <input id="chat-input" type="text" placeholder="Ask anything about this transaction, its risk, behavior, or evidence...">
+    <button onclick="askAssistant()">Ask</button>
+</div>
+
+<div class="panel">
+    <h2>Audit Trail</h2>
+
+    {% for log in audit_logs %}
+    <div class="evidence-item">
+
+        <div style="margin-bottom:6px;">
+            <strong>Investigation Assistant</strong>
+            <span style="color:#8b8fa3;">
+                — {{ log.timestamp|date:"Y-m-d H:i:s" }}
+            </span>
+        </div>
+
+        {% if log.new_state.question %}
+        <div>
+            <strong>Question:</strong>
+            {{ log.new_state.question }}
+        </div>
+        {% else %}
+        <div style="color:#8b8fa3;">
+            {{ log.action|title }}
+        </div>
+        {% endif %}
+
+    </div>
+
+    {% empty %}
+    <p style="color:#8b8fa3">No audit events yet.</p>
+    {% endfor %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+const transactionId = "{{ txn.transaction_id }}";
+const chatLog = document.getElementById("chat-log");
+
+function appendMessage(role, text) {
+    const div = document.createElement("div");
+    div.className = "chat-msg";
+
+    const roleDiv = document.createElement("div");
+    roleDiv.className = "role";
+    roleDiv.textContent = role;
+
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "message-content";
+
+    if (role === "RazorGuard") {
+        // Convert escaped Markdown back into normal Markdown.
+        let markdown = String(text || "")
+            .replace(/\\\*\*/g, "**")
+            .replace(/\\\*/g, "*")
+            .replace(/\\#/g, "#")
+            .replace(/\\`/g, "`")
+            .replace(/\\_/g, "_");
+
+        // Render Markdown as HTML.
+        messageDiv.innerHTML = marked.parse(markdown);
+    } else {
+        // User messages are always treated as plain text.
+        messageDiv.textContent = text || "";
+    }
+
+    div.appendChild(roleDiv);
+    div.appendChild(messageDiv);
+
+    chatLog.appendChild(div);
+    chatLog.scrollTop = chatLog.scrollHeight;
+}
+async function askAssistant() {
+    const input = document.getElementById("chat-input");
+    const question = input.value.trim();
+
+    if (!question) return;
+
+    appendMessage("You", question);
+    input.value = "";
+    appendMessage("RazorGuard", "Thinking...");
+
+    try {
+        const resp = await fetch(
+            `/api/investigate/${transactionId}/ask/`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({
+                    question: question
+                }),
+            }
+        );
+
+        const rawText = await resp.text();
+
+        chatLog.lastChild.remove();
+
+        let data;
+
+        try {
+            data = JSON.parse(rawText);
+        } catch (jsonError) {
+            appendMessage(
+                "RazorGuard",
+                `Backend returned HTTP ${resp.status}, but not JSON.\n\n${rawText.substring(0, 1000)}`
+            );
+            return;
+        }
+
+        if (!resp.ok) {
+            appendMessage(
+                "RazorGuard",
+                `Investigation API error (${resp.status}): ${
+                    data.detail ||
+                    data.error ||
+                    data.message ||
+                    JSON.stringify(data)
+                }`
+            );
+            return;
+        }
+
+        appendMessage(
+            "RazorGuard",
+            data.answer || "No answer returned."
+        );
+
+    } catch (error) {
+
+        chatLog.lastChild.remove();
+
+        appendMessage(
+            "RazorGuard",
+            `Could not reach the Investigation API.\n\n${error.message}`
+        );
+    }
+}
+document.getElementById("chat-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") askAssistant();
+});
+</script>
+
+{% endblock %}

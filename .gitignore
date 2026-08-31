@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+db.sqlite3
+staticfiles/
+*.egg-info/
+.venv/
+venv/
+ml/data/raw/*.csv
+ml/data/processed/*.csv
+ml/models/*.joblib
+!ml/models/.gitkeep
+.DS_Store
+*.log
