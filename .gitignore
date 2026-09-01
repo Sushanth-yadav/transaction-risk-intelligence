@@ -7,6 +7,7 @@ staticfiles/
 .venv/
 venv/
 ml/data/raw/*.csv
+!ml/data/raw/transactions.csv
 ml/data/processed/*.csv
 ml/models/*.joblib
 !ml/models/.gitkeep
