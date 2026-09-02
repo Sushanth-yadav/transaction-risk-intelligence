@@ -29,7 +29,7 @@ from apps.transactions.models import Customer, Device, IPAddress, Merchant, Paym
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--csv", default=str(BASE_DIR / "ml" / "data" / "raw" / "transactions.csv"))
+    parser.add_argument("--csv", default=str(BASE_DIR / "ml" / "data" / "demo" / "transactions_demo.csv"))
     parser.add_argument("--limit", type=int, default=None)
     args = parser.parse_args()
 
