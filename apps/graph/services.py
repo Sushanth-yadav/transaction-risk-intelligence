@@ -400,3 +400,57 @@ def get_customer_graph(customer_id, timestamp_cutoff=None):
         transaction_id=txn.transaction_id,
         timestamp_cutoff=timestamp_cutoff,
     )
+def graph_score_and_evidence(transaction, features):
+    """Return a bounded graph risk score and structured evidence."""
+    analysis = analyze_relationships(
+        customer_id=transaction.customer.customer_id,
+        device_id=transaction.device.device_id,
+        ip_id=transaction.ip_address.ip_id,
+        transaction_id=transaction.transaction_id,
+        timestamp_cutoff=transaction.timestamp,
+    )
+
+    score = 0.0
+    evidence = []
+
+    shared_device_customers = analysis["shared_device_customers"]
+    shared_ip_customers = analysis["shared_ip_customers"]
+
+    if shared_device_customers:
+        score += min(60.0, 20.0 * len(shared_device_customers))
+        evidence.append({
+            "description": (
+                f"Device {transaction.device.device_id} is shared with "
+                f"{len(shared_device_customers)} other customer(s)."
+            ),
+            "signal": "shared_device",
+            "customer_count": len(shared_device_customers),
+            "customers": shared_device_customers[:20],
+        })
+
+    if shared_ip_customers:
+        score += min(40.0, 15.0 * len(shared_ip_customers))
+        evidence.append({
+            "description": (
+                f"IP {transaction.ip_address.ip_id} is shared with "
+                f"{len(shared_ip_customers)} other customer(s)."
+            ),
+            "signal": "shared_ip",
+            "customer_count": len(shared_ip_customers),
+            "customers": shared_ip_customers[:20],
+        })
+
+    score = min(100.0, round(score, 2))
+
+    if analysis["potential_fraud_ring"]:
+        evidence.append({
+            "description": (
+                "The transaction is connected to other customers through "
+                "shared device or IP relationships."
+            ),
+            "signal": "potential_fraud_ring",
+            "connected_customers": len(analysis["connected_customers"]),
+            "connected_transactions": len(analysis["connected_transactions"]),
+        })
+
+    return score, evidence
