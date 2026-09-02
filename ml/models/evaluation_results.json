@@ -25,7 +25,7 @@
     "recall": 0.935,
     "f1": 0.9504,
     "roc_auc": 0.9998,
-    "pr_auc": 0.9942,
+    "pr_auc": 0.9943,
     "confusion_matrix": {
       "tn": 4751,
       "fp": 4,
@@ -40,7 +40,7 @@
   "random_forest_feature_importance_top10": [
     {
       "feature": "amount_ratio_to_customer_avg",
-      "importance": 0.2131
+      "importance": 0.2137
     },
     {
       "feature": "amount",
@@ -48,7 +48,7 @@
     },
     {
       "feature": "amount_zscore_vs_customer",
-      "importance": 0.1433
+      "importance": 0.143
     },
     {
       "feature": "hours_since_last_txn",
@@ -60,7 +60,7 @@
     },
     {
       "feature": "is_new_ip",
-      "importance": 0.0545
+      "importance": 0.0543
     },
     {
       "feature": "is_new_device",
@@ -68,15 +68,15 @@
     },
     {
       "feature": "txn_count_last_24h",
-      "importance": 0.0372
+      "importance": 0.0373
     },
     {
       "feature": "device_customer_count_so_far",
-      "importance": 0.0315
+      "importance": 0.0312
     },
     {
       "feature": "account_age_days",
-      "importance": 0.0266
+      "importance": 0.0268
     }
   ],
   "split_info": {

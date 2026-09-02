@@ -15,6 +15,7 @@ This module is intended to be shared between:
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 EPS = 1e-6
 
@@ -151,9 +152,19 @@ CATEGORICAL_COLUMNS = ["payment_method", "merchant_category"]
 
 
 if __name__ == "__main__":
-    raw = pd.read_csv("../data/raw/transactions.csv")
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    RAW_PATH = BASE_DIR / "data" / "raw" / "transactions.csv"
+    PROCESSED_DIR = BASE_DIR / "data" / "processed"
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    OUTPUT_PATH = PROCESSED_DIR / "features.csv"
+
+    raw = pd.read_csv(RAW_PATH)
     features = build_features(raw)
-    features.to_csv("../data/processed/features.csv", index=False)
-    print(f"Built {len(FEATURE_COLUMNS)} numeric features + {len(CATEGORICAL_COLUMNS)} categorical, "
-          f"{len(features)} rows -> ../data/processed/features.csv")
+    features.to_csv(OUTPUT_PATH, index=False)
+
+    print(
+        f"Built {len(FEATURE_COLUMNS)} numeric features + "
+        f"{len(CATEGORICAL_COLUMNS)} categorical, "
+        f"{len(features)} rows -> {OUTPUT_PATH}"
+    )
     print(features[FEATURE_COLUMNS + ["fraud_label"]].describe().T)
