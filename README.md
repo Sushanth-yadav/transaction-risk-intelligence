@@ -1324,6 +1324,37 @@ Testing should cover important areas such as:
 * APIs,
 * investigation behavior.
 
+
+
+## Engineering Challenge & Recovery
+
+During development, we performed a fresh database rebuild to verify that the project could be reproduced from a clean state.
+
+The initial risk backfill exposed an integration issue in the graph-risk scoring layer: the required graph scoring function was missing from the graph service, causing the initial backfill pipeline to fail.
+
+Instead of bypassing the failure, we traced the issue through the risk pipeline, identified the missing graph-risk integration, implemented the required graph scoring and evidence generation, and reran the complete backfill process.
+
+### Final Verification
+
+- Transactions processed: **1,000**
+- Skipped: **0**
+- Failed: **0**
+
+The successful rebuild validated the complete reproducibility flow:
+
+```text
+Fresh Database
+      ↓
+Django Migrations
+      ↓
+Seed Demo Transactions
+      ↓
+Risk Backfill
+      ↓
+ML + Rules + Behavioral + Graph
+      ↓
+Risk Assessment + Evidence
+
 \---
 
 # 34\. Environment Variables
